@@ -1,0 +1,42 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Packer.Models;
+
+namespace Packer.Data;
+
+public class PackerDbContext(DbContextOptions<PackerDbContext> options)
+    : IdentityDbContext<User, IdentityRole<int>, int>(options)
+{
+    public DbSet<Gear> Gear => Set<Gear>();
+    public DbSet<Trip> Trips => Set<Trip>();
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        ConfigureGear(builder.Entity<Gear>());
+
+        var trip = builder.Entity<Trip>();
+        trip.ToTable("trip", "public");
+        trip.HasOne(item => item.User)
+            .WithMany()
+            .HasForeignKey(item => item.UserId);
+    }
+
+    private static void ConfigureGear(EntityTypeBuilder<Gear> gear)
+    {
+        var categories = string.Join(", ", Enum.GetNames<GearCategory>().Select(name => $"'{name}'"));
+
+        gear.ToTable("gear", "public", table =>
+        {
+            table.HasCheckConstraint("CK_gear_weight_ounces", "\"WeightOunces\" >= 0");
+            table.HasCheckConstraint("CK_gear_category", $"\"Category\" IN ({categories})");
+        });
+
+        gear.Property(item => item.Category).HasConversion<string>();
+        gear.HasOne(item => item.User)
+            .WithMany()
+            .HasForeignKey(item => item.UserId);
+    }
+}
