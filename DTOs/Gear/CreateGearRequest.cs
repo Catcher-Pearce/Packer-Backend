@@ -17,4 +17,6 @@ public class CreateGearRequest
     [EnumDataType(typeof(GearCategory))]
     [JsonConverter(typeof(JsonStringEnumConverter<GearCategory>))]
     public GearCategory? Category { get; init; }
+
+    public bool IsConsumable { get; init; }
 }

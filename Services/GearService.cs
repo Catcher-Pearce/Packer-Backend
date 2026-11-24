@@ -16,11 +16,12 @@ public class GearService(GearRepository repository)
             UserId = userId,
             Name = request.Name.Trim(),
             WeightOunces = request.WeightOunces!.Value,
-            Category = request.Category!.Value
+            Category = request.Category!.Value,
+            IsConsumable = request.IsConsumable
         };
 
         await repository.AddAsync(gear, cancellationToken);
-        return new GearResponse(gear.Id, gear.UserId, gear.Name, gear.WeightOunces, gear.Category);
+        return ToResponse(gear);
     }
 
     public async Task<GearResponse?> EditAsync(
@@ -42,8 +43,11 @@ public class GearService(GearRepository repository)
         if (request.Category is { } category)
             gear.Category = category;
 
+        if (request.IsConsumable is { } isConsumable)
+            gear.IsConsumable = isConsumable;
+
         await repository.PatchAsync(cancellationToken);
-        return new GearResponse(gear.Id, gear.UserId, gear.Name, gear.WeightOunces, gear.Category);
+        return ToResponse(gear);
     }
 
     public async Task<GearResponse?> DeleteAsync(
@@ -58,6 +62,14 @@ public class GearService(GearRepository repository)
         
         
         await repository.DeleteAsync(id, userId, cancellationToken);
-        return new GearResponse(gear.Id, gear.UserId, gear.Name, gear.WeightOunces, gear.Category);
+        return ToResponse(gear);
+    }
+
+    private static GearResponse ToResponse(Gear gear)
+    {
+        return new GearResponse(gear.Id, gear.UserId, gear.Name, gear.WeightOunces, gear.Category)
+        {
+            IsConsumable = gear.IsConsumable
+        };
     }
 }

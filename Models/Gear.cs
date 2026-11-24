@@ -8,4 +8,5 @@ public class Gear
     public required string Name { get; set; }
     public decimal WeightOunces { get; set; }
     public GearCategory Category { get; set; }
+    public bool IsConsumable { get; set; }
 }

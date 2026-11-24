@@ -11,6 +11,7 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
 {
     public DbSet<Gear> Gear => Set<Gear>();
     public DbSet<Trip> Trips => Set<Trip>();
+    public DbSet<TripGear> TripGear => Set<TripGear>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -22,6 +23,14 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
         trip.HasOne(item => item.User)
             .WithMany()
             .HasForeignKey(item => item.UserId);
+
+        var tripGear = builder.Entity<TripGear>();
+        tripGear.ToTable("trip_gear", "public", table =>
+            table.HasCheckConstraint("CK_trip_gear_quantity", "\"Quantity\" > 0"));
+        tripGear.HasKey(item => new { item.TripId, item.GearId });
+        tripGear.HasOne(item => item.Trip).WithMany().HasForeignKey(item => item.TripId);
+        tripGear.HasOne(item => item.Gear).WithMany().HasForeignKey(item => item.GearId);
+        tripGear.Property(item => item.IsPacked).HasDefaultValue(false);
     }
 
     private static void ConfigureGear(EntityTypeBuilder<Gear> gear)
@@ -35,6 +44,7 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
         });
 
         gear.Property(item => item.Category).HasConversion<string>();
+        gear.Property(item => item.IsConsumable).HasDefaultValue(false);
         gear.HasOne(item => item.User)
             .WithMany()
             .HasForeignKey(item => item.UserId);

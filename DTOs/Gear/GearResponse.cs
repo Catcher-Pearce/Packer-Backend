@@ -8,4 +8,7 @@ public record GearResponse(
     int UserId,
     string Name,
     decimal WeightOunces,
-    [property: JsonConverter(typeof(JsonStringEnumConverter<GearCategory>))] GearCategory Category);
+    [property: JsonConverter(typeof(JsonStringEnumConverter<GearCategory>))] GearCategory Category)
+{
+    public bool IsConsumable { get; init; }
+}

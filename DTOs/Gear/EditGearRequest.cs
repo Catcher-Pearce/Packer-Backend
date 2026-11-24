@@ -15,6 +15,8 @@ public class EditGearRequest : IValidatableObject
     [JsonConverter(typeof(JsonStringEnumConverter<GearCategory>))]
     public GearCategory? Category { get; init; }
 
+    public bool? IsConsumable { get; init; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Name is not null && string.IsNullOrWhiteSpace(Name))

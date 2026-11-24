@@ -24,6 +24,8 @@ builder.Services.AddScoped<GearRepository>();
 builder.Services.AddScoped<GearService>();
 builder.Services.AddScoped<TripRepository>();
 builder.Services.AddScoped<TripService>();
+builder.Services.AddScoped<TripGearRepository>();
+builder.Services.AddScoped<TripGearService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 

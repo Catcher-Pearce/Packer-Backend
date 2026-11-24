@@ -166,6 +166,11 @@ namespace Packer.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsConsumable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -222,6 +227,32 @@ namespace Packer.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("trip", "public");
+                });
+
+            modelBuilder.Entity("Packer.Models.TripGear", b =>
+                {
+                    b.Property<int>("TripId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GearId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsPacked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TripId", "GearId");
+
+                    b.HasIndex("GearId");
+
+                    b.ToTable("trip_gear", "public", t =>
+                        {
+                            t.HasCheckConstraint("CK_trip_gear_quantity", "\"Quantity\" > 0");
+                        });
                 });
 
             modelBuilder.Entity("Packer.Models.User", b =>
@@ -362,6 +393,25 @@ namespace Packer.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Packer.Models.TripGear", b =>
+                {
+                    b.HasOne("Packer.Models.Gear", "Gear")
+                        .WithMany()
+                        .HasForeignKey("GearId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Packer.Models.Trip", "Trip")
+                        .WithMany()
+                        .HasForeignKey("TripId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Gear");
+
+                    b.Navigation("Trip");
                 });
 #pragma warning restore 612, 618
         }
