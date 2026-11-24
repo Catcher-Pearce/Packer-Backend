@@ -6,6 +6,12 @@ namespace Packer.Services;
 
 public class TripGearService(TripGearRepository repository)
 {
+    public Task<List<TripGearListItemResponse>?> ListAsync(
+        int tripId, int userId, CancellationToken cancellationToken)
+    {
+        return repository.ListAsync(tripId, userId, cancellationToken);
+    }
+
     public async Task<(TripGearResponse? Item, bool AlreadyExists)> AddAsync(
         int tripId, int userId, AddTripGearRequest request, CancellationToken cancellationToken)
     {

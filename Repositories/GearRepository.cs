@@ -11,6 +11,13 @@ public class GearRepository(PackerDbContext db)
         db.Gear.Add(gear);
         await db.SaveChangesAsync(cancellationToken);
     }
+    public Task<List<Gear>> GetAsync(int userId, CancellationToken cancellationToken)
+    {
+        return db.Gear
+            .AsNoTracking()
+            .Where(gear => gear.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
 
     public Task<Gear?> Find(int id, int userId, CancellationToken cancellationToken)
     {

@@ -12,6 +12,18 @@ namespace Packer.Controllers;
 [Route("api/gear")]
 public class GearController(GearService gearService, UserManager<User> userManager) : ControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<List<GearResponse>>> List(
+        CancellationToken cancellationToken)
+    {
+        var account = await userManager.GetUserAsync(User);
+        if (account is null)
+            return Unauthorized();
+
+        List<GearResponse> gearList = await gearService.GetAsync(account.Id, cancellationToken);
+        return Ok(gearList);
+    }
+    
     [HttpPost]
     public async Task<ActionResult<GearResponse>> Add(
         CreateGearRequest request,

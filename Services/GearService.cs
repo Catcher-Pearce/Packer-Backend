@@ -6,6 +6,15 @@ namespace Packer.Services;
 
 public class GearService(GearRepository repository)
 {
+
+    public async Task<List<GearResponse>> GetAsync(int userId, CancellationToken cancellationToken)
+    {
+        var gearList = await repository.GetAsync(userId, cancellationToken);
+        List<GearResponse> gearResponse = gearList.Select(gear => ToResponse(gear)).ToList();
+        
+        return gearResponse;
+
+    }
     public async Task<GearResponse> AddAsync(
         int userId,
         CreateGearRequest request,

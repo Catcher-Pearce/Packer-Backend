@@ -1,12 +1,28 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Packer.Data;
+using Packer.DTOs;
 using Packer.Models;
 
 namespace Packer.Repositories;
 
 public class TripGearRepository(PackerDbContext db)
 {
+    public Task<List<TripGearListItemResponse>?> ListAsync(
+        int tripId, int userId, CancellationToken cancellationToken)
+    {
+        return db.Trips
+            .Where(trip => trip.Id == tripId && trip.UserId == userId)
+            .Select(trip => db.TripGear
+                .Where(item => item.TripId == trip.Id && item.Gear.UserId == userId)
+                .OrderBy(item => item.GearId)
+                .Select(item => new TripGearListItemResponse(
+                    item.TripId, item.GearId, item.Gear.Name, item.Gear.WeightOunces,
+                    item.Gear.Category, item.Gear.IsConsumable, item.Quantity, item.IsPacked))
+                .ToList())
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<(bool Added, bool AlreadyExists)> AddAsync(
         TripGear item, int userId, CancellationToken cancellationToken)
     {

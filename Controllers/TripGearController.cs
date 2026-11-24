@@ -12,6 +12,18 @@ namespace Packer.Controllers;
 [Route("api/trips/{tripId:int}/gear")]
 public class TripGearController(TripGearService service, UserManager<User> userManager) : ControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<List<TripGearListItemResponse>>> List(
+        int tripId, CancellationToken cancellationToken)
+    {
+        var account = await userManager.GetUserAsync(User);
+        if (account is null)
+            return Unauthorized();
+
+        var items = await service.ListAsync(tripId, account.Id, cancellationToken);
+        return items is null ? NotFound() : Ok(items);
+    }
+
     [HttpPost]
     public async Task<ActionResult<TripGearResponse>> Add(
         int tripId, AddTripGearRequest request, CancellationToken cancellationToken)
