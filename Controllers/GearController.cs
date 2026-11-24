@@ -54,7 +54,7 @@ public class GearController(GearService gearService, UserManager<User> userManag
         return Ok(gear);
     }
     
-    [HttpDelete()]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult<GearResponse>> Delete(
         int id,
         CancellationToken cancellationToken)
@@ -68,5 +68,11 @@ public class GearController(GearService gearService, UserManager<User> userManag
             return NotFound();
 
         return Ok(gear);
+    }
+
+    [HttpGet("categories")]
+    public ActionResult<List<String>> GetCategories()
+    {
+        return Ok(Enum.GetNames<GearCategory>().ToList());
     }
 }

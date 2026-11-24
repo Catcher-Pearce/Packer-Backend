@@ -1,0 +1,41 @@
+services:
+  api:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      PACKER_POSTGRES_CONNECTION_STRING: "Host=db;Port=5432;Database=packer;Username=packer;Password=${PACKER_DB_PASSWORD:?Set PACKER_DB_PASSWORD}"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  migrate:
+    build:
+      context: .
+      target: migrations
+    environment:
+      PACKER_POSTGRES_CONNECTION_STRING: "Host=db;Port=5432;Database=packer;Username=packer;Password=${PACKER_DB_PASSWORD:?Set PACKER_DB_PASSWORD}"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_DB: packer
+      POSTGRES_USER: packer
+      POSTGRES_PASSWORD: "${PACKER_DB_PASSWORD:?Set PACKER_DB_PASSWORD}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U packer -d packer"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

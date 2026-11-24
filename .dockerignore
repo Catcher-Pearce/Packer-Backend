@@ -1,0 +1,11 @@
+.git
+.idea
+.aws
+.agents
+.codex
+**/bin
+**/obj
+packages
+.env*
+appsettings.Local.json
+appsettings.*.local.json

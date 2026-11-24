@@ -24,15 +24,15 @@ public class TripGearController(TripGearService service, UserManager<User> userM
         return items is null ? NotFound() : Ok(items);
     }
 
-    [HttpPost]
+    [HttpPost("{gearId:int}")]
     public async Task<ActionResult<TripGearResponse>> Add(
-        int tripId, AddTripGearRequest request, CancellationToken cancellationToken)
+        int tripId, int gearId, AddTripGearRequest request, CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);
         if (account is null)
             return Unauthorized();
 
-        var result = await service.AddAsync(tripId, account.Id, request, cancellationToken);
+        var result = await service.AddAsync(tripId, account.Id, gearId, request, cancellationToken);
         if (result.AlreadyExists)
             return Conflict(new { message = "This gear is already on the trip." });
 

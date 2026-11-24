@@ -13,12 +13,12 @@ public class TripGearService(TripGearRepository repository)
     }
 
     public async Task<(TripGearResponse? Item, bool AlreadyExists)> AddAsync(
-        int tripId, int userId, AddTripGearRequest request, CancellationToken cancellationToken)
+        int tripId, int userId, int gearId, AddTripGearRequest request, CancellationToken cancellationToken)
     {
         var item = new TripGear
         {
             TripId = tripId,
-            GearId = request.GearId,
+            GearId = gearId,
             Quantity = request.Quantity
         };
 
