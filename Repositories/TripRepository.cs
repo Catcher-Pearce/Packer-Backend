@@ -20,7 +20,7 @@ public class TripRepository(PackerDbContext db)
             .ToListAsync(cancellationToken);
     }
 
-    public Task<Trip?> Find(int id, int userId, CancellationToken cancellationToken)
+    public Task<Trip?> Find(Guid id, int userId, CancellationToken cancellationToken)
     {
         return db.Trips.SingleOrDefaultAsync(
             trip => trip.Id == id && trip.UserId == userId, cancellationToken);
@@ -31,7 +31,7 @@ public class TripRepository(PackerDbContext db)
         return db.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<int> DeleteAsync(int id, int userId, CancellationToken cancellationToken)
+    public Task<int> DeleteAsync(Guid id, int userId, CancellationToken cancellationToken)
     {
         return db.Trips
             .Where(trip => trip.Id == id && trip.UserId == userId)

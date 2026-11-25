@@ -156,15 +156,18 @@ namespace Packer.Data.Migrations
 
             modelBuilder.Entity("Packer.Models.Gear", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("statement_timestamp()");
 
                     b.Property<bool>("IsConsumable")
                         .ValueGeneratedOnAdd()
@@ -175,8 +178,20 @@ namespace Packer.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("statement_timestamp()");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
+
+                    b.Property<long>("Version")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L)
+                        .HasColumnName("version");
 
                     b.Property<decimal>("WeightOunces")
                         .HasColumnType("numeric");
@@ -195,11 +210,14 @@ namespace Packer.Data.Migrations
 
             modelBuilder.Entity("Packer.Models.Trip", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("statement_timestamp()");
 
                     b.Property<DateOnly>("DateEnd")
                         .HasColumnType("date");
@@ -207,8 +225,20 @@ namespace Packer.Data.Migrations
                     b.Property<DateOnly>("DateStart")
                         .HasColumnType("date");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("statement_timestamp()");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
+
+                    b.Property<long>("Version")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L)
+                        .HasColumnName("version");
 
                     b.Property<string>("address")
                         .IsRequired()
@@ -231,11 +261,17 @@ namespace Packer.Data.Migrations
 
             modelBuilder.Entity("Packer.Models.TripGear", b =>
                 {
-                    b.Property<int>("TripId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("GearId")
-                        .HasColumnType("integer");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("statement_timestamp()");
+
+                    b.Property<Guid>("GearId")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsPacked")
                         .ValueGeneratedOnAdd()
@@ -245,9 +281,27 @@ namespace Packer.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.HasKey("TripId", "GearId");
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("statement_timestamp()");
+
+                    b.Property<long>("Version")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L)
+                        .HasColumnName("version");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("GearId");
+
+                    b.HasIndex("TripId", "GearId")
+                        .IsUnique();
 
                     b.ToTable("trip_gear", "public", t =>
                         {

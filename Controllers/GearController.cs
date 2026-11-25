@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Packer.DTOs;
 using Packer.Models;
 using Packer.Services;
@@ -33,13 +35,24 @@ public class GearController(GearService gearService, UserManager<User> userManag
         if (account is null)
             return Unauthorized();
 
-        var gear = await gearService.AddAsync(account.Id, request, cancellationToken);
-        return StatusCode(StatusCodes.Status201Created, gear);
+        if (request.Id == Guid.Empty)
+            return BadRequest(new { message = "Id must be a non-empty UUID." });
+
+        try
+        {
+            var gear = await gearService.AddAsync(account.Id, request, cancellationToken);
+            return StatusCode(StatusCodes.Status201Created, gear);
+        }
+        catch (DbUpdateException error) when (error.InnerException is PostgresException
+            { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "PK_gear" })
+        {
+            return Conflict(new { message = "This UUID is already in use." });
+        }
     }
 
-    [HttpPatch("{id:int}")]
+    [HttpPatch("{id:guid}")]
     public async Task<ActionResult<GearResponse>> Edit(
-        int id,
+        Guid id,
         EditGearRequest request,
         CancellationToken cancellationToken)
     {
@@ -54,9 +67,9 @@ public class GearController(GearService gearService, UserManager<User> userManag
         return Ok(gear);
     }
     
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:guid}")]
     public async Task<ActionResult<GearResponse>> Delete(
-        int id,
+        Guid id,
         CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);

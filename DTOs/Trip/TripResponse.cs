@@ -1,10 +1,15 @@
+using System.Text.Json.Serialization;
+
 namespace Packer.DTOs;
 
 public record TripResponse(
-    int Id,
+    Guid Id,
     int UserId,
     DateOnly DateStart,
     DateOnly DateEnd,
     string Address,
     string City,
-    string State);
+    string State,
+    long Version,
+    [property: JsonPropertyName("created_at")] DateTimeOffset CreatedAt,
+    [property: JsonPropertyName("updated_at")] DateTimeOffset UpdatedAt);

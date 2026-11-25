@@ -22,6 +22,7 @@ public class GearService(GearRepository repository)
     {
         var gear = new Gear
         {
+            Id = request.Id,
             UserId = userId,
             Name = request.Name.Trim(),
             WeightOunces = request.WeightOunces!.Value,
@@ -34,7 +35,7 @@ public class GearService(GearRepository repository)
     }
 
     public async Task<GearResponse?> EditAsync(
-        int id,
+        Guid id,
         int userId,
         EditGearRequest request,
         CancellationToken cancellationToken)
@@ -60,7 +61,7 @@ public class GearService(GearRepository repository)
     }
 
     public async Task<GearResponse?> DeleteAsync(
-        int id,
+        Guid id,
         int userId,
         CancellationToken cancellationToken)
     {
@@ -76,7 +77,8 @@ public class GearService(GearRepository repository)
 
     private static GearResponse ToResponse(Gear gear)
     {
-        return new GearResponse(gear.Id, gear.UserId, gear.Name, gear.WeightOunces, gear.Category)
+        return new GearResponse(gear.Id, gear.UserId, gear.Name, gear.WeightOunces, gear.Category,
+            gear.Version, gear.CreatedAt, gear.UpdatedAt)
         {
             IsConsumable = gear.IsConsumable
         };

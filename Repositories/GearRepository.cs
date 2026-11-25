@@ -19,7 +19,7 @@ public class GearRepository(PackerDbContext db)
             .ToListAsync(cancellationToken);
     }
 
-    public Task<Gear?> Find(int id, int userId, CancellationToken cancellationToken)
+    public Task<Gear?> Find(Guid id, int userId, CancellationToken cancellationToken)
     {
         return db.Gear.SingleOrDefaultAsync(
             gear => gear.Id == id && gear.UserId == userId, cancellationToken);
@@ -30,7 +30,7 @@ public class GearRepository(PackerDbContext db)
         return db.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<int> DeleteAsync(int id, int userId, CancellationToken cancellationToken)
+    public Task<int> DeleteAsync(Guid id, int userId, CancellationToken cancellationToken)
     {
         return db.Gear
             .Where(gear => gear.Id == id && gear.UserId == userId)

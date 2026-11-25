@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Packer.DTOs;
 using Packer.Models;
 using Packer.Services;
@@ -21,10 +23,18 @@ public class TripController(TripService tripService, UserManager<User> userManag
         if (account is null)
             return Unauthorized();
 
+        if (request.Id == Guid.Empty)
+            return BadRequest(new { message = "Id must be a non-empty UUID." });
+
         try
         {
             var trip = await tripService.AddAsync(account.Id, request, cancellationToken);
             return CreatedAtAction(nameof(Get), new { id = trip.Id }, trip);
+        }
+        catch (DbUpdateException error) when (error.InnerException is PostgresException
+            { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "PK_trip" })
+        {
+            return Conflict(new { message = "This UUID is already in use." });
         }
         catch (ValidationException error)
         {
@@ -42,8 +52,8 @@ public class TripController(TripService tripService, UserManager<User> userManag
         return Ok(await tripService.ListAsync(account.Id, cancellationToken));
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<TripResponse>> Get(int id, CancellationToken cancellationToken)
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<TripResponse>> Get(Guid id, CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);
         if (account is null)
@@ -53,9 +63,9 @@ public class TripController(TripService tripService, UserManager<User> userManag
         return trip is null ? NotFound() : Ok(trip);
     }
 
-    [HttpPatch("{id:int}")]
+    [HttpPatch("{id:guid}")]
     public async Task<ActionResult<TripResponse>> Edit(
-        int id, EditTripRequest request, CancellationToken cancellationToken)
+        Guid id, EditTripRequest request, CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);
         if (account is null)
@@ -72,8 +82,8 @@ public class TripController(TripService tripService, UserManager<User> userManag
         }
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<ActionResult<TripResponse>> Delete(int id, CancellationToken cancellationToken)
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult<TripResponse>> Delete(Guid id, CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);
         if (account is null)

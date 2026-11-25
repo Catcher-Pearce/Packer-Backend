@@ -13,6 +13,7 @@ public class TripService(TripRepository tripRepository)
         ValidateDates(request.DateStart, request.DateEnd);
         var trip = new Trip
         {
+            Id = request.Id,
             UserId = userId,
             DateStart = request.DateStart,
             DateEnd = request.DateEnd,
@@ -33,14 +34,14 @@ public class TripService(TripRepository tripRepository)
     }
 
     public async Task<TripResponse?> GetAsync(
-        int id, int userId, CancellationToken cancellationToken)
+        Guid id, int userId, CancellationToken cancellationToken)
     {
         var trip = await tripRepository.Find(id, userId, cancellationToken);
         return trip is null ? null : ToResponse(trip);
     }
 
     public async Task<TripResponse?> EditAsync(
-        int id, int userId, EditTripRequest request, CancellationToken cancellationToken)
+        Guid id, int userId, EditTripRequest request, CancellationToken cancellationToken)
     {
         var trip = await tripRepository.Find(id, userId, cancellationToken);
         if (trip is null)
@@ -65,7 +66,7 @@ public class TripService(TripRepository tripRepository)
     }
 
     public async Task<TripResponse?> DeleteAsync(
-        int id, int userId, CancellationToken cancellationToken)
+        Guid id, int userId, CancellationToken cancellationToken)
     {
         var trip = await tripRepository.Find(id, userId, cancellationToken);
         if (trip is null)
@@ -92,6 +93,6 @@ public class TripService(TripRepository tripRepository)
     private static TripResponse ToResponse(Trip trip)
     {
         return new TripResponse(trip.Id, trip.UserId, trip.DateStart, trip.DateEnd,
-            trip.address, trip.city, trip.state);
+            trip.address, trip.city, trip.state, trip.Version, trip.CreatedAt, trip.UpdatedAt);
     }
 }

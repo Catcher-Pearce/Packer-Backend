@@ -20,6 +20,7 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
         ConfigureGear(builder.Entity<Gear>());
 
         var trip = builder.Entity<Trip>();
+        ConfigureRecord(trip);
         trip.ToTable("trip", "public");
         trip.HasOne(item => item.User)
             .WithMany()
@@ -28,14 +29,27 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
         var tripGear = builder.Entity<TripGear>();
         tripGear.ToTable("trip_gear", "public", table =>
             table.HasCheckConstraint("CK_trip_gear_quantity", "\"Quantity\" > 0"));
-        tripGear.HasKey(item => new { item.TripId, item.GearId });
+        ConfigureRecord(tripGear);
+        tripGear.HasIndex(item => new { item.TripId, item.GearId }).IsUnique();
         tripGear.HasOne(item => item.Trip).WithMany().HasForeignKey(item => item.TripId);
         tripGear.HasOne(item => item.Gear).WithMany().HasForeignKey(item => item.GearId);
         tripGear.Property(item => item.IsPacked).HasDefaultValue(false);
     }
 
+    private static void ConfigureRecord<TEntity>(EntityTypeBuilder<TEntity> entity) where TEntity : class
+    {
+        entity.Property<Guid>("Id").ValueGeneratedNever();
+        entity.Property<long>("Version").HasColumnName("version")
+            .HasDefaultValue(1L).ValueGeneratedOnAddOrUpdate();
+        entity.Property<DateTimeOffset>("CreatedAt").HasColumnName("created_at")
+            .HasDefaultValueSql("statement_timestamp()");
+        entity.Property<DateTimeOffset>("UpdatedAt").HasColumnName("updated_at")
+            .HasDefaultValueSql("statement_timestamp()").ValueGeneratedOnAddOrUpdate();
+    }
+
     private static void ConfigureGear(EntityTypeBuilder<Gear> gear)
     {
+        ConfigureRecord(gear);
         var categories = string.Join(", ", Enum.GetNames<GearCategory>().Select(name => $"'{name}'"));
 
         gear.ToTable("gear", "public", table =>

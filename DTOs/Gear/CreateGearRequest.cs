@@ -6,6 +6,8 @@ namespace Packer.DTOs;
 
 public class CreateGearRequest
 {
+    public required Guid Id { get; init; }
+
     [Required]
     public required string Name { get; init; }
 

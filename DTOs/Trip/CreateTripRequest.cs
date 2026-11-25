@@ -4,6 +4,8 @@ namespace Packer.DTOs;
 
 public class CreateTripRequest
 {
+    public required Guid Id { get; init; }
+
     public required DateOnly DateStart { get; init; }
     public required DateOnly DateEnd { get; init; }
 

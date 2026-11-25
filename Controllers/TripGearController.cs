@@ -9,12 +9,12 @@ namespace Packer.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("api/trips/{tripId:int}/gear")]
+[Route("api/trips/{tripId:guid}/gear")]
 public class TripGearController(TripGearService service, UserManager<User> userManager) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<List<TripGearListItemResponse>>> List(
-        int tripId, CancellationToken cancellationToken)
+        Guid tripId, CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);
         if (account is null)
@@ -24,17 +24,20 @@ public class TripGearController(TripGearService service, UserManager<User> userM
         return items is null ? NotFound() : Ok(items);
     }
 
-    [HttpPost("{gearId:int}")]
+    [HttpPost("{gearId:guid}")]
     public async Task<ActionResult<TripGearResponse>> Add(
-        int tripId, int gearId, AddTripGearRequest request, CancellationToken cancellationToken)
+        Guid tripId, Guid gearId, AddTripGearRequest request, CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);
         if (account is null)
             return Unauthorized();
 
+        if (request.Id == Guid.Empty)
+            return BadRequest(new { message = "Id must be a non-empty UUID." });
+
         var result = await service.AddAsync(tripId, account.Id, gearId, request, cancellationToken);
         if (result.AlreadyExists)
-            return Conflict(new { message = "This gear is already on the trip." });
+            return Conflict(new { message = "This gear is already on the trip or the UUID is already in use." });
 
         if (result.Item is null)
             return NotFound();
@@ -42,9 +45,9 @@ public class TripGearController(TripGearService service, UserManager<User> userM
         return StatusCode(StatusCodes.Status201Created, result.Item);
     }
 
-    [HttpDelete("{gearId:int}")]
+    [HttpDelete("{gearId:guid}")]
     public async Task<IActionResult> Delete(
-        int tripId, int gearId, CancellationToken cancellationToken)
+        Guid tripId, Guid gearId, CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);
         if (account is null)
@@ -55,9 +58,9 @@ public class TripGearController(TripGearService service, UserManager<User> userM
             : NotFound();
     }
 
-    [HttpPatch("{gearId:int}/packed")]
+    [HttpPatch("{gearId:guid}/packed")]
     public async Task<IActionResult> SetPacked(
-        int tripId, int gearId, SetTripGearPackedRequest request, CancellationToken cancellationToken)
+        Guid tripId, Guid gearId, SetTripGearPackedRequest request, CancellationToken cancellationToken)
     {
         var account = await userManager.GetUserAsync(User);
         if (account is null)

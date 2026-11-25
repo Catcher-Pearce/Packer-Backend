@@ -9,7 +9,7 @@ namespace Packer.Repositories;
 public class TripGearRepository(PackerDbContext db)
 {
     public Task<List<TripGearListItemResponse>?> ListAsync(
-        int tripId, int userId, CancellationToken cancellationToken)
+        Guid tripId, int userId, CancellationToken cancellationToken)
     {
         return db.Trips
             .Where(trip => trip.Id == tripId && trip.UserId == userId)
@@ -17,8 +17,9 @@ public class TripGearRepository(PackerDbContext db)
                 .Where(item => item.TripId == trip.Id && item.Gear.UserId == userId)
                 .OrderBy(item => item.GearId)
                 .Select(item => new TripGearListItemResponse(
-                    item.TripId, item.GearId, item.Gear.Name, item.Gear.WeightOunces,
-                    item.Gear.Category, item.Gear.IsConsumable, item.Quantity, item.IsPacked))
+                    item.Id, item.TripId, item.GearId, item.Gear.Name, item.Gear.WeightOunces,
+                    item.Gear.Category, item.Gear.IsConsumable, item.Quantity, item.IsPacked,
+                    item.Version, item.CreatedAt, item.UpdatedAt))
                 .ToList())
             .SingleOrDefaultAsync(cancellationToken);
     }
@@ -51,20 +52,20 @@ public class TripGearRepository(PackerDbContext db)
     }
 
     public Task<int> DeleteAsync(
-        int tripId, int gearId, int userId, CancellationToken cancellationToken)
+        Guid tripId, Guid gearId, int userId, CancellationToken cancellationToken)
     {
         return OwnedLink(tripId, gearId, userId).ExecuteDeleteAsync(cancellationToken);
     }
 
     public Task<int> SetPackedAsync(
-        int tripId, int gearId, int userId, bool isPacked, CancellationToken cancellationToken)
+        Guid tripId, Guid gearId, int userId, bool isPacked, CancellationToken cancellationToken)
     {
         return OwnedLink(tripId, gearId, userId)
             .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.IsPacked, isPacked),
                 cancellationToken);
     }
 
-    private IQueryable<TripGear> OwnedLink(int tripId, int gearId, int userId)
+    private IQueryable<TripGear> OwnedLink(Guid tripId, Guid gearId, int userId)
     {
         return db.TripGear.Where(item => item.TripId == tripId && item.GearId == gearId
             && item.Trip.UserId == userId && item.Gear.UserId == userId);
