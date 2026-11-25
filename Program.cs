@@ -4,7 +4,8 @@ using Packer.Models;
 using Packer.Repositories;
 using Packer.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+var migrate = args is ["--migrate"];
+var builder = WebApplication.CreateBuilder(migrate ? [] : args);
 
 builder.Services.AddDbContext<PackerDbContext>(options =>
 {
@@ -28,6 +29,15 @@ builder.Services.AddScoped<TripGearRepository>();
 builder.Services.AddScoped<TripGearService>();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
+
+if (migrate)
+{
+    await using var migrationApp = builder.Build();
+    await using var scope = migrationApp.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<PackerDbContext>();
+    await db.Database.MigrateAsync();
+    return;
+}
 
 var app = builder.Build();
 
