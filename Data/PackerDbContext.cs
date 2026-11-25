@@ -16,6 +16,7 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Entity<User>().HasIndex(user => user.NormalizedEmail).IsUnique();
         ConfigureGear(builder.Entity<Gear>());
 
         var trip = builder.Entity<Trip>();
