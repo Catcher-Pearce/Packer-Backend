@@ -259,6 +259,30 @@ namespace Packer.Data.Migrations
                     b.ToTable("trip", "public");
                 });
 
+            modelBuilder.Entity("Packer.Models.TripFood", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Calories")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("WeightOunces")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TripId");
+
+                    b.ToTable("trip_food", "public");
+                });
+
             modelBuilder.Entity("Packer.Models.TripGear", b =>
                 {
                     b.Property<Guid>("Id")
@@ -448,6 +472,17 @@ namespace Packer.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Packer.Models.TripFood", b =>
+                {
+                    b.HasOne("Packer.Models.Trip", "Trip")
+                        .WithMany()
+                        .HasForeignKey("TripId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trip");
                 });
 
             modelBuilder.Entity("Packer.Models.TripGear", b =>

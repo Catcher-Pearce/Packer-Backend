@@ -12,6 +12,7 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
     public DbSet<Gear> Gear => Set<Gear>();
     public DbSet<Trip> Trips => Set<Trip>();
     public DbSet<TripGear> TripGear => Set<TripGear>();
+    public DbSet<TripFood> TripFood => Set<TripFood>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -34,6 +35,11 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
         tripGear.HasOne(item => item.Trip).WithMany().HasForeignKey(item => item.TripId);
         tripGear.HasOne(item => item.Gear).WithMany().HasForeignKey(item => item.GearId);
         tripGear.Property(item => item.IsPacked).HasDefaultValue(false);
+
+        var tripFood = builder.Entity<TripFood>();
+        tripFood.ToTable("trip_food", "public");
+        tripFood.Property(item => item.Id).ValueGeneratedNever();
+        tripFood.HasOne(item => item.Trip).WithMany().HasForeignKey(item => item.TripId);
     }
 
     private static void ConfigureRecord<TEntity>(EntityTypeBuilder<TEntity> entity) where TEntity : class
