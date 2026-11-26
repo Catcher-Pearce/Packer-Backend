@@ -5,6 +5,7 @@ namespace Packer.DTOs;
 public record TripResponse(
     Guid Id,
     int UserId,
+    string Name,
     DateOnly DateStart,
     DateOnly DateEnd,
     string Address,

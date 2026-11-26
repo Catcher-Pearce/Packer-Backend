@@ -225,6 +225,10 @@ namespace Packer.Data.Migrations
                     b.Property<DateOnly>("DateStart")
                         .HasColumnType("date");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")

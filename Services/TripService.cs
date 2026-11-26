@@ -15,6 +15,7 @@ public class TripService(TripRepository tripRepository)
         {
             Id = request.Id,
             UserId = userId,
+            Name = request.Name.Trim(),
             DateStart = request.DateStart,
             DateEnd = request.DateEnd,
             address = request.Address.Trim(),
@@ -51,12 +52,16 @@ public class TripService(TripRepository tripRepository)
         var dateEnd = request.DateEnd ?? trip.DateEnd;
         ValidateDates(dateStart, dateEnd);
 
+        if (request.Name is { } name && string.IsNullOrWhiteSpace(name))
+            throw new ValidationException("Name must contain a non-whitespace character.");
+
         var address = ValidateLocation(request.Address, nameof(request.Address)) ?? trip.address;
         var city = ValidateLocation(request.City, nameof(request.City)) ?? trip.city;
         var state = ValidateLocation(request.State, nameof(request.State)) ?? trip.state;
 
         trip.DateStart = dateStart;
         trip.DateEnd = dateEnd;
+        trip.Name = request.Name?.Trim() ?? trip.Name;
         trip.address = address;
         trip.city = city;
         trip.state = state;
@@ -92,7 +97,7 @@ public class TripService(TripRepository tripRepository)
 
     private static TripResponse ToResponse(Trip trip)
     {
-        return new TripResponse(trip.Id, trip.UserId, trip.DateStart, trip.DateEnd,
+        return new TripResponse(trip.Id, trip.UserId, trip.Name, trip.DateStart, trip.DateEnd,
             trip.address, trip.city, trip.state, trip.Version, trip.CreatedAt, trip.UpdatedAt);
     }
 }

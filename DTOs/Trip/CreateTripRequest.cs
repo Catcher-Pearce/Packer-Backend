@@ -6,6 +6,9 @@ public class CreateTripRequest
 {
     public required Guid Id { get; init; }
 
+    [Required]
+    public required string Name { get; init; }
+
     public required DateOnly DateStart { get; init; }
     public required DateOnly DateEnd { get; init; }
 
