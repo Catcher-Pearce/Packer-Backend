@@ -17,7 +17,7 @@ public class TripFoodRepository(PackerDbContext db)
                 .Where(item => item.TripId == trip.Id)
                 .OrderBy(item => item.Id)
                 .Select(item => new TripFoodResponse(
-                    item.Id, item.TripId, item.WeightOunces, item.Calories, item.Quantity))
+                    item.Id, item.TripId, item.Name, item.WeightOunces, item.Calories, item.Quantity))
                 .ToList())
             .SingleOrDefaultAsync(cancellationToken);
     }

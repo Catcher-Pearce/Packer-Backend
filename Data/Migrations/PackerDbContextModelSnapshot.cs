@@ -267,6 +267,10 @@ namespace Packer.Data.Migrations
                     b.Property<int>("Calories")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 

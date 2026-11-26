@@ -19,6 +19,7 @@ public class TripFoodService(TripFoodRepository repository)
         {
             Id = request.Id,
             TripId = tripId,
+            Name = request.Name.Trim(),
             WeightOunces = request.WeightOunces,
             Calories = request.Calories,
             Quantity = request.Quantity
@@ -26,7 +27,7 @@ public class TripFoodService(TripFoodRepository repository)
 
         var result = await repository.AddAsync(item, userId, cancellationToken);
         return result.Added
-            ? (new TripFoodResponse(item.Id, item.TripId, item.WeightOunces, item.Calories, item.Quantity), false)
+            ? (new TripFoodResponse(item.Id, item.TripId, item.Name, item.WeightOunces, item.Calories, item.Quantity), false)
             : (null, result.AlreadyExists);
     }
 

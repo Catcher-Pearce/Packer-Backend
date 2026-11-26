@@ -6,6 +6,9 @@ public class AddTripFoodRequest
 {
     public required Guid Id { get; init; }
 
+    [Required]
+    public required string Name { get; init; }
+
     [Range(typeof(decimal), "0", "79228162514264337593543950335")]
     public required decimal WeightOunces { get; init; }
 
