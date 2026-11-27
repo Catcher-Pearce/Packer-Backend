@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Packer.DTOs.Gear;
 using Packer.Models;
 
 namespace Packer.DTOs;
@@ -16,6 +17,7 @@ public class EditGearRequest : IValidatableObject
     public GearCategory? Category { get; init; }
 
     public bool? IsConsumable { get; init; }
+    public SleepingBagDetailsRequest? SleepingBag { get; init; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

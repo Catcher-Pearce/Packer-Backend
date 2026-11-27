@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using Packer.DTOs;
+using Packer.DTOs.Gear;
 using Packer.Models;
 using Packer.Repositories;
 
@@ -30,6 +32,16 @@ public class GearService(GearRepository repository)
             IsConsumable = request.IsConsumable
         };
 
+        if (request.SleepingBag is { } details)
+        {
+            gear.SleepingBag = new SleepingBag
+            {
+                GearId = gear.Id,
+                LowerLimitTempF = details.LowerLimitTempF,
+                ComfortTempF = details.ComfortTempF
+            };
+        }
+
         await repository.AddAsync(gear, cancellationToken);
         return ToResponse(gear);
     }
@@ -43,6 +55,8 @@ public class GearService(GearRepository repository)
         var gear = await repository.Find(id, userId, cancellationToken);
         if (gear is null)
             return null;
+
+        ApplySleepingBagEdit(request, gear);
 
         if (request.Name is { } name)
             gear.Name = name.Trim();
@@ -58,6 +72,29 @@ public class GearService(GearRepository repository)
 
         await repository.PatchAsync(cancellationToken);
         return ToResponse(gear);
+    }
+
+    private static void ApplySleepingBagEdit(EditGearRequest request, Gear gear)
+    {
+        if (request.SleepingBag is { } details)
+        {
+            if ((request.Category ?? gear.Category) != GearCategory.SleepingBag)
+                throw new ValidationException("Sleeping bag details require the SleepingBag category.");
+
+            if (details.HasLowerLimitTempF || details.HasComfortTempF)
+            {
+                var bag = gear.SleepingBag;
+                var lowerLimit = details.HasLowerLimitTempF ? details.LowerLimitTempF : bag?.LowerLimitTempF;
+                var comfort = details.HasComfortTempF ? details.ComfortTempF : bag?.ComfortTempF;
+                if (lowerLimit > comfort)
+                    throw new ValidationException("The lower limit must be at or below the comfort temperature.");
+
+                bag ??= new SleepingBag { GearId = gear.Id };
+                bag.LowerLimitTempF = lowerLimit;
+                bag.ComfortTempF = comfort;
+                gear.SleepingBag = bag;
+            }
+        }
     }
 
     public async Task<GearResponse?> DeleteAsync(
@@ -80,7 +117,10 @@ public class GearService(GearRepository repository)
         return new GearResponse(gear.Id, gear.UserId, gear.Name, gear.WeightOunces, gear.Category,
             gear.Version, gear.CreatedAt, gear.UpdatedAt)
         {
-            IsConsumable = gear.IsConsumable
+            IsConsumable = gear.IsConsumable,
+            SleepingBag = gear.Category == GearCategory.SleepingBag && gear.SleepingBag is { } details
+                ? new SleepingBagDetailsResponse(details.LowerLimitTempF, details.ComfortTempF)
+                : null
         };
     }
 }

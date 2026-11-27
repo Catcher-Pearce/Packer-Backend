@@ -4,8 +4,7 @@ public enum GearCategory
 {
     Backpack,
     Shelter,
-    SleepSystem,
-    Clothing,
+    Clothing = 3,
     Footwear,
     Kitchen,
     Hydration,
@@ -14,5 +13,7 @@ public enum GearCategory
     Safety,
     Health,
     Hygiene,
-    Miscellaneous
+    Miscellaneous,
+    SleepingPad,
+    SleepingBag
 }

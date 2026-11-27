@@ -14,4 +14,9 @@ public record GearResponse(
     [property: JsonPropertyName("updated_at")] DateTimeOffset UpdatedAt)
 {
     public bool IsConsumable { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SleepingBagDetailsResponse? SleepingBag { get; init; }
 }
+
+public record SleepingBagDetailsResponse(decimal? LowerLimitTempF, decimal? ComfortTempF);

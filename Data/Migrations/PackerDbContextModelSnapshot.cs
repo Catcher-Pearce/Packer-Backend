@@ -202,9 +202,30 @@ namespace Packer.Data.Migrations
 
                     b.ToTable("gear", "public", t =>
                         {
-                            t.HasCheckConstraint("CK_gear_category", "\"Category\" IN ('Backpack', 'Shelter', 'SleepSystem', 'Clothing', 'Footwear', 'Kitchen', 'Hydration', 'Navigation', 'Electronics', 'Safety', 'Health', 'Hygiene', 'Miscellaneous')");
+                            t.HasCheckConstraint("CK_gear_category", "\"Category\" IN ('Backpack', 'Shelter', 'Clothing', 'Footwear', 'Kitchen', 'Hydration', 'Navigation', 'Electronics', 'Safety', 'Health', 'Hygiene', 'Miscellaneous', 'SleepingPad', 'SleepingBag')");
 
                             t.HasCheckConstraint("CK_gear_weight_ounces", "\"WeightOunces\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Packer.Models.SleepingBag", b =>
+                {
+                    b.Property<Guid>("GearId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("ComfortTempF")
+                        .HasColumnType("numeric")
+                        .HasColumnName("comfort_temp_f");
+
+                    b.Property<decimal?>("LowerLimitTempF")
+                        .HasColumnType("numeric")
+                        .HasColumnName("lower_limit_temp_f");
+
+                    b.HasKey("GearId");
+
+                    b.ToTable("sleeping_bag", "public", t =>
+                        {
+                            t.HasCheckConstraint("CK_sleeping_bag_temperature_order", "lower_limit_temp_f <= comfort_temp_f");
                         });
                 });
 
@@ -471,6 +492,17 @@ namespace Packer.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Packer.Models.SleepingBag", b =>
+                {
+                    b.HasOne("Packer.Models.Gear", "Gear")
+                        .WithOne("SleepingBag")
+                        .HasForeignKey("Packer.Models.SleepingBag", "GearId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Gear");
+                });
+
             modelBuilder.Entity("Packer.Models.Trip", b =>
                 {
                     b.HasOne("Packer.Models.User", "User")
@@ -510,6 +542,11 @@ namespace Packer.Data.Migrations
                     b.Navigation("Gear");
 
                     b.Navigation("Trip");
+                });
+
+            modelBuilder.Entity("Packer.Models.Gear", b =>
+                {
+                    b.Navigation("SleepingBag");
                 });
 #pragma warning restore 612, 618
         }

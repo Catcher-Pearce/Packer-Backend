@@ -13,6 +13,7 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
     public DbSet<Trip> Trips => Set<Trip>();
     public DbSet<TripGear> TripGear => Set<TripGear>();
     public DbSet<TripFood> TripFood => Set<TripFood>();
+    public DbSet<SleepingBag> SleepingBags => Set<SleepingBag>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -40,6 +41,17 @@ public class PackerDbContext(DbContextOptions<PackerDbContext> options)
         tripFood.ToTable("trip_food", "public");
         tripFood.Property(item => item.Id).ValueGeneratedNever();
         tripFood.HasOne(item => item.Trip).WithMany().HasForeignKey(item => item.TripId);
+
+        var sleepingBag = builder.Entity<SleepingBag>();
+        sleepingBag.ToTable("sleeping_bag", "public", table =>
+            table.HasCheckConstraint("CK_sleeping_bag_temperature_order", "lower_limit_temp_f <= comfort_temp_f"));
+        sleepingBag.HasKey(item => item.GearId);
+        sleepingBag.Property(item => item.GearId).ValueGeneratedNever();
+        sleepingBag.Property(item => item.LowerLimitTempF).HasColumnName("lower_limit_temp_f");
+        sleepingBag.Property(item => item.ComfortTempF).HasColumnName("comfort_temp_f");
+        sleepingBag.HasOne(item => item.Gear)
+            .WithOne(item => item.SleepingBag)
+            .HasForeignKey<SleepingBag>(item => item.GearId);
     }
 
     private static void ConfigureRecord<TEntity>(EntityTypeBuilder<TEntity> entity) where TEntity : class

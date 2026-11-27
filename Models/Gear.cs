@@ -9,6 +9,7 @@ public class Gear
     public decimal WeightOunces { get; set; }
     public GearCategory Category { get; set; }
     public bool IsConsumable { get; set; }
+    public SleepingBag? SleepingBag { get; set; }
     public long Version { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }

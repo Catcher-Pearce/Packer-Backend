@@ -1,9 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Packer.DTOs;
+using Packer.DTOs.Gear;
 using Packer.Models;
 using Packer.Services;
 
@@ -60,11 +62,24 @@ public class GearController(GearService gearService, UserManager<User> userManag
         if (account is null)
             return Unauthorized();
 
-        var gear = await gearService.EditAsync(id, account.Id, request, cancellationToken);
-        if (gear is null)
-            return NotFound();
-
-        return Ok(gear);
+        try
+        {
+            var gear = await gearService.EditAsync(id, account.Id, request, cancellationToken);
+            return gear is null ? NotFound() : Ok(gear);
+        }
+        catch (ValidationException error)
+        {
+            return BadRequest(new { message = error.Message });
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Conflict(new { message = "The gear changed while it was being edited. Reload it and retry." });
+        }
+        catch (DbUpdateException error) when (error.InnerException is PostgresException
+            { ConstraintName: "PK_sleeping_bag" or "FK_sleeping_bag_gear_GearId" or "CK_sleeping_bag_temperature_order" })
+        {
+            return Conflict(new { message = "The sleeping bag changed while it was being edited. Reload it and retry." });
+        }
     }
     
     [HttpDelete("{id:guid}")]
