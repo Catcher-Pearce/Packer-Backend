@@ -101,6 +101,13 @@ public class GearController(GearService gearService, UserManager<User> userManag
     [HttpGet("categories")]
     public ActionResult<List<String>> GetCategories()
     {
-        return Ok(Enum.GetNames<GearCategory>().ToList());
+        GearCategory[] firstCategories =
+            [GearCategory.Backpack, GearCategory.Shelter, GearCategory.SleepingBag, GearCategory.SleepingPad];
+
+        var categories = firstCategories
+            .Concat(Enum.GetValues<GearCategory>().Except(firstCategories))
+            .Select(category => category.ToString())
+            .ToList();
+        return Ok(categories);
     }
 }
